@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Погода</string>
+    <string name="clear">Ясно</string>
+    <string name="partly_cloudy">Малооблачно</string>
+    <string name="cloudy">Облачно с прояснениями</string>
+    <string name="overcast">Пасмурно</string>
+    <string name="drizzle">Морось</string>
+    <string name="light_rain">Небольшой дождь</string>
+    <string name="rain">Дождь</string>
+    <string name="moderate_rain">Умеренно сильный дождь</string>
+    <string name="heavy_rain">Сильный дождь</string>
+    <string name="continuous_heavy_rain">Длительный сильный дождь</string>
+    <string name="showers">Ливень</string>
+    <string name="wet_snow">Дождь со снегом</string>
+    <string name="light_snow">Небольшой снег</string>
+    <string name="snow">Снег</string>
+    <string name="snow_showers">Снегопад</string>
+    <string name="hail">Град</string>
+    <string name="thunderstorm">Гроза</string>
+    <string name="thunderstorm_with_rain">Дождь с грозой</string>
+    <string name="thunderstorm_with_hail">Гроза с градом</string>
+    <string name="permission_is_not_granted">Разрешение не предоставлено</string>
+    <string name="permission_is_granted">Разрешение предоставлено</string>
+    <string name="feels_like">Ощущается как</string>
+    <string name="min_temp">Мин. температура</string>
+    <string name="max_temp">Макс. температура</string>
+
+</resources>

@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">Weather</string>
+    <string name="clear">Clear</string>
+    <string name="partly_cloudy">Partly cloudy</string>
+    <string name="cloudy">Cloudy</string>
+    <string name="overcast">Overcast</string>
+    <string name="drizzle">Drizzle</string>
+    <string name="light_rain">Light rain</string>
+    <string name="rain">Rain</string>
+    <string name="moderate_rain">Moderate rain</string>
+    <string name="heavy_rain">Heavy rain</string>
+    <string name="continuous_heavy_rain">Continuous heavy rain</string>
+    <string name="showers">Showers</string>
+    <string name="wet_snow">Wet snow</string>
+    <string name="light_snow">Light snow</string>
+    <string name="snow">Snow</string>
+    <string name="snow_showers">Snow showers</string>
+    <string name="hail">Hail</string>
+    <string name="thunderstorm">Thunderstorm</string>
+    <string name="thunderstorm_with_rain">Thunderstorm with rain</string>
+    <string name="thunderstorm_with_hail">Thunderstorm with hail</string>
+    <string name="permission_is_not_granted">Permission is not granted</string>
+    <string name="permission_is_granted">Permission is granted</string>
+    <string name="feels_like">Feels like</string>
+    <string name="min_temp">Min temp</string>
+    <string name="max_temp">Max temp</string>
+</resources>

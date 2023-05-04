@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph"
+    app:startDestination="@id/homelikeFragment">
+
+    <fragment
+        android:id="@+id/homelikeFragment"
+        android:name="com.example.weather20.presentation.HomelikeFragment"
+        android:label="fragment_homelike"
+        tools:layout="@layout/fragment_homelike" />
+
+</navigation>
