@@ -20,22 +20,6 @@ object DialogManager {
         dialog.show()
     }
 
-    fun searchByNameDialog(context: Context, listener: Listener) {
-        val builder = AlertDialog.Builder(context)
-        val editName = EditText(context)
-        builder.setView(editName)
-        val dialog = builder.create()
-        dialog.setTitle("City name:")
-        dialog.setButton(AlertDialog.BUTTON_POSITIVE, "OK") { _, _ ->
-            listener.onClick(editName.text.toString())
-            dialog.dismiss()
-        }
-        dialog.setButton(AlertDialog.BUTTON_NEGATIVE, "Cancel") { _, _ ->
-            dialog.dismiss()
-        }
-        dialog.show()
-    }
-
     interface Listener {
         fun onClick(name: String?)
     }

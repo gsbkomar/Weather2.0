@@ -29,11 +29,11 @@ class RetrofitYandexWeatherInstance @Inject constructor() {
             "Content-type: application/json",
             "X-Yandex-API-Key: ${Key.API_KEY}",
         )
-        @GET("forecast?lat=55.75396&lon=37.620393&lang=ru_RU")
+        @GET("forecast?")
         suspend fun getForecastProvider(
             @Query("lat") lat: Double,
             @Query("lon") lon: Double,
-            @Query("limit") limit: Byte = 3,
+            @Query("limit") limit: Byte = 7,
             @Query("extra") extra: Boolean = true
         ): Results
     }

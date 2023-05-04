@@ -147,9 +147,9 @@
     </androidx.cardview.widget.CardView>
 
     <androidx.recyclerview.widget.RecyclerView
-        tools:listitem="@layout/custom_forecast_day"
+        tools:listitem="@layout/forecast_day_item"
         android:id="@+id/rc_days_future"
-        tools:layout_height="250dp"
+        tools:layout_height="270dp"
         android:layout_marginTop="20dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

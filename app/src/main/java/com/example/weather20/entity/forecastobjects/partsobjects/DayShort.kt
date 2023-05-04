@@ -7,5 +7,5 @@ import com.squareup.moshi.JsonClass
 data class DayShort(
     @Json(name = "temp") val temp: Byte? = null,
     @Json(name = "temp_min") val temp_min: Byte? = null, // Минимальная температура для времени суток (°C).
-    @Json(name = "temp_max") val temp_max: Byte? = null,
+    @Json(name = "icon") val icon: String? = null
 )

@@ -20,9 +20,12 @@ import androidx.core.app.ActivityCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.weather20.R
 import com.example.weather20.State
 import com.example.weather20.databinding.FragmentHomelikeBinding
+import com.example.weather20.entity.resultobjects.Forecasts
+import com.example.weather20.presentation.adapters.ForecastListAdapter
 import com.example.weather20.presentation.extensions.isPermissionsGranted
 import com.example.weather20.presentation.managers.DialogManager
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -30,6 +33,10 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -43,6 +50,7 @@ class HomelikeFragment @Inject constructor() : Fragment() {
     @Inject
     lateinit var homelikeViewModelFactory: HomelikeViewModelFactory
     private val viewModel: HomelikeViewModel by viewModels { homelikeViewModelFactory }
+    private val forecastListAdapter = ForecastListAdapter()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -61,6 +69,16 @@ class HomelikeFragment @Inject constructor() : Fragment() {
         with(binding.lottieBackground) {
             setAnimation(R.raw.background_day)
             playAnimation()
+        }
+
+        binding.rcDaysFuture.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+
+        binding.rcDaysFuture.adapter = forecastListAdapter
+
+        lifecycleScope.launch {
+            viewModel.forecasts.onEach {
+                forecastListAdapter.submitList(it.toList())
+            }.launchIn(viewLifecycleOwner.lifecycleScope)
         }
     }
 

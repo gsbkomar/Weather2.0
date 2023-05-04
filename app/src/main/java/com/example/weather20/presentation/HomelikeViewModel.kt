@@ -2,9 +2,11 @@ package com.example.weather20.presentation
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.util.Log
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import coil.decode.SvgDecoder
 import coil.load
 import com.example.weather20.R
@@ -13,10 +15,14 @@ import com.example.weather20.data.ForecastRepository
 import com.example.weather20.databinding.FragmentHomelikeBinding
 import com.example.weather20.entity.Results
 import com.example.weather20.entity.resultobjects.Fact
+import com.example.weather20.entity.resultobjects.Forecasts
+import com.example.weather20.presentation.IconLoadImage.loadIcon
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 class HomelikeViewModel @Inject constructor(private var forecastRepository: ForecastRepository) :
@@ -27,6 +33,9 @@ class HomelikeViewModel @Inject constructor(private var forecastRepository: Fore
 
     private var _error = Channel<String>()
     var error = _error.receiveAsFlow()
+
+    private var _forecasts = MutableStateFlow<List<Forecasts>>(emptyList())
+    val forecasts = _forecasts.asStateFlow()
 
     suspend fun forecastInfo(lat: Double, lon: Double): Results =
         forecastRepository.getForecastInfo(lat, lon)
@@ -43,7 +52,7 @@ class HomelikeViewModel @Inject constructor(private var forecastRepository: Fore
         with(binding) {
             _state.value = State.Loading
             stateInfo(binding)
-            tvCondition.text = translateConditionToRu(fact, activity)
+            tvCondition.text = translateCondition(fact, activity)
             tvTime.text = forecastInfo(lat, lon).forecasts?.first()?.date.toString()
             tvCurrentTemp.text =
                 if (currentTemp!! < 0) "-$currentTemp C°" else "$currentTemp C°"
@@ -64,8 +73,24 @@ class HomelikeViewModel @Inject constructor(private var forecastRepository: Fore
                 ?.temp_min.toString() + " C°," + activity.getString(R.string.max_temp) + ": " + forecastInfo(
                 lat, lon
             ).forecasts?.first()?.parts?.day_short?.temp_min.toString() + " C°"
+            forecastsLoader(lat, lon)
             _state.value = State.Success
             stateInfo(binding)
+        }
+    }
+
+    private fun forecastsLoader(lat: Double, lon: Double) {
+        viewModelScope.launch(Dispatchers.IO) {
+            kotlin.runCatching {
+                forecastRepository.getForecastInfo(lat, lon).forecasts
+            }.fold(
+                onSuccess = {
+                    _forecasts.value = it!!
+                },
+                onFailure = {
+                    Log.d("MarsPhotosViewModel", "loadPhotos: ${it.message ?: ""}")
+                }
+            )
         }
     }
 
@@ -90,7 +115,7 @@ class HomelikeViewModel @Inject constructor(private var forecastRepository: Fore
         }
     }
 
-    fun translateConditionToRu(fact: Fact?, activity: Activity) = when (fact?.condition) {
+    private fun translateCondition(fact: Fact?, activity: Activity) = when (fact?.condition) {
         "clear" -> activity.getString(R.string.clear)
         "partly-cloudy" -> activity.getString(R.string.partly_cloudy)
         "cloudy" -> activity.getString(R.string.cloudy)
@@ -113,10 +138,4 @@ class HomelikeViewModel @Inject constructor(private var forecastRepository: Fore
             activity.getString(R.string.thunderstorm_with_hail)
         }
     }
-
-
-    private fun loadIcon(icon: String, view: AppCompatImageView) =
-        view.load("https://yastatic.net/weather/i/icons/funky/dark/$icon.svg") {
-            decoderFactory { result, options, _ -> SvgDecoder(result.source, options) }
-        }
 }
