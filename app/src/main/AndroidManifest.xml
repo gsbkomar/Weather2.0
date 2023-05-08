@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
 
     <application
+        android:enableOnBackInvokedCallback="true"
         android:usesCleartextTraffic="true"
         android:name=".App"
         android:allowBackup="true"
@@ -18,7 +19,7 @@
         android:roundIcon="@mipmap/ic_app_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.Weather20"
-        tools:targetApi="31">
+        tools:targetApi="tiramisu">
         <activity
             android:name=".MainActivity"
             android:exported="true">

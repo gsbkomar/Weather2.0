@@ -3,20 +3,17 @@ package com.example.weather20.presentation
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.util.Log
-import androidx.appcompat.widget.AppCompatImageView
-import androidx.core.view.isVisible
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import coil.decode.SvgDecoder
-import coil.load
 import com.example.weather20.R
 import com.example.weather20.State
-import com.example.weather20.data.ForecastRepository
+import com.example.weather20.data.dto.ResultsDto
+import com.example.weather20.data.dto.resultsdto.FactDto
+import com.example.weather20.data.dto.resultsdto.ForecastsDto
 import com.example.weather20.databinding.FragmentHomelikeBinding
-import com.example.weather20.entity.Results
-import com.example.weather20.entity.resultobjects.Fact
-import com.example.weather20.entity.resultobjects.Forecasts
-import com.example.weather20.presentation.IconLoadImage.loadIcon
+import com.example.weather20.domain.GetForecastUseCase
+import com.example.weather20.presentation.extensions.loadIcon
+import com.example.weather20.presentation.translations.Translations
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,20 +22,20 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class HomelikeViewModel @Inject constructor(private var forecastRepository: ForecastRepository) :
+class HomelikeViewModel @Inject constructor(private var getForecastUseCase: GetForecastUseCase) :
     ViewModel() {
 
-    private var _state = MutableStateFlow<State>(State.Success)
+    private var _state = MutableStateFlow<State>(State.Loading)
     var state = _state.asStateFlow()
 
     private var _error = Channel<String>()
     var error = _error.receiveAsFlow()
 
-    private var _forecasts = MutableStateFlow<List<Forecasts>>(emptyList())
+    private var _forecasts = MutableStateFlow<List<ForecastsDto>>(emptyList())
     val forecasts = _forecasts.asStateFlow()
 
-    suspend fun forecastInfo(lat: Double, lon: Double): Results =
-        forecastRepository.getForecastInfo(lat, lon)
+    suspend fun forecastInfo(lat: Double, lon: Double): ResultsDto =
+        getForecastUseCase.getForecastInfo(lat, lon)
 
     @SuppressLint("SetTextI18n")
     suspend fun refreshForecast(
@@ -46,96 +43,58 @@ class HomelikeViewModel @Inject constructor(private var forecastRepository: Fore
         lat: Double,
         lon: Double,
         activity: Activity,
-        fact: Fact?
+        fact: FactDto
     ) {
-        val currentTemp = forecastInfo(lat, lon).fact?.temp
-        with(binding) {
+        val currentTemp = forecastInfo(lat, lon).fact.temp
+
+        viewModelScope.launch {
             _state.value = State.Loading
-            stateInfo(binding)
-            tvCondition.text = translateCondition(fact, activity)
-            tvTime.text = forecastInfo(lat, lon).forecasts?.first()?.date.toString()
-            tvCurrentTemp.text =
-                if (currentTemp!! < 0) "-$currentTemp C°" else "$currentTemp C°"
-            loadIcon(
-                forecastInfo(lat, lon).fact?.icon.toString(),
-                binding.iconDashboardCurrentTemp
-            )
-            tvWindSpeed.text = "${forecastInfo(lat, lon).fact?.wind_speed.toString()} м/с"
-            tvFeelsLike.text = activity.getString(R.string.feels_like) + ": " + forecastInfo(
-                lat,
-                lon
-            ).fact?.feels_like.toString() + " C°"
-            tvHumidity.text = "${forecastInfo(lat, lon).fact?.humidity.toString()} %"
-            tvMinMax.text = activity.getString(R.string.min_temp) + ": " + forecastInfo(
-                lat,
-                lon
-            ).forecasts?.first()?.parts?.day_short
-                ?.temp_min.toString() + " C°," + activity.getString(R.string.max_temp) + ": " + forecastInfo(
-                lat, lon
-            ).forecasts?.first()?.parts?.day_short?.temp_min.toString() + " C°"
-            forecastsLoader(lat, lon)
-            _state.value = State.Success
-            stateInfo(binding)
+            try {
+                with(binding) {
+                    _state.value = State.Loading
+                    tvCondition.text = Translations().translateCondition(fact.condition, activity)
+                    tvTime.text = forecastInfo(lat, lon).forecasts.first().date
+                    tvCurrentTemp.text =
+                        if (currentTemp < 0) "-$currentTemp C°" else "$currentTemp C°"
+                    binding.iconDashboardCurrentTemp.loadIcon(forecastInfo(lat, lon).fact.icon)
+                    tvWindSpeed.text = "${forecastInfo(lat, lon).fact.wind_speed} м/с"
+                    tvFeelsLike.text =
+                        activity.getString(R.string.feels_like) + ": " + forecastInfo(
+                            lat,
+                            lon
+                        ).fact.feels_like.toString() + " C°"
+                    tvHumidity.text = "${forecastInfo(lat, lon).fact.humidity} %"
+                    tvMinMax.text = activity.getString(R.string.min_temp) + ": " + forecastInfo(
+                        lat,
+                        lon
+                    ).forecasts.first().parts!!.day_short
+                        .temp_min.toString() + " C°," + activity.getString(R.string.max_temp) + ": " + forecastInfo(
+                        lat,
+                        lon
+                    )
+                        .forecasts.first().parts!!.day_short.temp.toString() + " C°"
+                    forecastsLoader(lat, lon)
+                    _state.value = State.Success
+                }
+            } catch (e: Exception) {
+                _state.value = State.Error("No internet connection or location enabled")
+                Log.d("HomelikeViewModel", e.message.toString())
+            }
         }
     }
 
     private fun forecastsLoader(lat: Double, lon: Double) {
         viewModelScope.launch(Dispatchers.IO) {
             kotlin.runCatching {
-                forecastRepository.getForecastInfo(lat, lon).forecasts
+                getForecastUseCase.getForecastInfo(lat, lon).forecasts
             }.fold(
                 onSuccess = {
-                    _forecasts.value = it!!
+                    _forecasts.value = it
                 },
                 onFailure = {
-                    Log.d("MarsPhotosViewModel", "loadPhotos: ${it.message ?: ""}")
+                    Log.d("HomelikeViewModel", "forecast: ${it.message ?: ""}")
                 }
             )
-        }
-    }
-
-    private fun stateInfo(binding: FragmentHomelikeBinding) {
-        when (_state.value) {
-            State.Loading -> with(binding) {
-                lottieLoading.isVisible = true
-                lottieLoading.playAnimation()
-                cardViewForecast.isVisible = false
-            }
-
-            State.Success -> with(binding) {
-                lottieLoading.isVisible = false
-                lottieLoading.pauseAnimation()
-                cardViewForecast.isVisible = true
-                lottieBackground.isVisible = true
-            }
-
-            else -> {
-                _state.value = State.Error("Exception")
-            }
-        }
-    }
-
-    private fun translateCondition(fact: Fact?, activity: Activity) = when (fact?.condition) {
-        "clear" -> activity.getString(R.string.clear)
-        "partly-cloudy" -> activity.getString(R.string.partly_cloudy)
-        "cloudy" -> activity.getString(R.string.cloudy)
-        "overcast" -> activity.getString(R.string.overcast)
-        "drizzle" -> activity.getString(R.string.drizzle)
-        "light-rain" -> activity.getString(R.string.light_rain)
-        "rain" -> activity.getString(R.string.rain)
-        "moderate-rain" -> activity.getString(R.string.moderate_rain)
-        "heavy-rain" -> activity.getString(R.string.heavy_rain)
-        "continuous-heavy-rain" -> activity.getString(R.string.continuous_heavy_rain)
-        "showers" -> activity.getString(R.string.showers)
-        "wet-snow" -> activity.getString(R.string.wet_snow)
-        "light-snow" -> activity.getString(R.string.light_snow)
-        "snow" -> activity.getString(R.string.snow)
-        "snow-showers" -> activity.getString(R.string.snow_showers)
-        "hail" -> activity.getString(R.string.hail)
-        "thunderstorm" -> activity.getString(R.string.thunderstorm)
-        "thunderstorm-with-rain" -> activity.getString(R.string.thunderstorm_with_rain)
-        else -> {
-            activity.getString(R.string.thunderstorm_with_hail)
         }
     }
 }

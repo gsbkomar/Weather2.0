@@ -5,16 +5,16 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView.Adapter
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.example.weather20.data.dto.resultsdto.ForecastsDto
 import com.example.weather20.databinding.ForecastDayItemBinding
-import com.example.weather20.entity.resultobjects.Forecasts
-import com.example.weather20.presentation.IconLoadImage.loadIcon
+import com.example.weather20.presentation.extensions.loadIcon
 import javax.inject.Inject
 
 class ForecastAdapter @Inject constructor() : Adapter<ForecastViewHolder>() {
-    private var forecastsData: List<Forecasts> = mutableListOf()
+    private var forecastsData: List<ForecastsDto> = mutableListOf()
 
     @SuppressLint("NotifyDataSetChanged")
-    fun setData(data: List<Forecasts>) {
+    fun setData(data: List<ForecastsDto>) {
         this.forecastsData = data.toMutableList()
         notifyDataSetChanged()
     }
@@ -32,12 +32,12 @@ class ForecastAdapter @Inject constructor() : Adapter<ForecastViewHolder>() {
     override fun getItemCount(): Int = forecastsData.size
 
     override fun onBindViewHolder(holder: ForecastViewHolder, position: Int) {
-        val forecasts = forecastsData.getOrNull(position)
+        val forecasts = forecastsData.getOrNull(position)!!
         with(holder.binding) {
-            tvDate.text = forecasts!!.date
-            tvMaxTemp.text = forecasts.parts!!.day_short!!.temp.toString()
-            tvMinTemp.text = forecasts.parts.day_short!!.temp_min.toString()
-            loadIcon(forecasts.parts.day_short.icon.toString(), ivIcon)
+            tvDate.text = forecasts.date
+            tvMaxTemp.text = forecasts.parts!!.day_short.temp.toString()
+            tvMinTemp.text = forecasts.parts.day_short.temp_min.toString()
+            ivIcon.loadIcon(forecasts.parts.day_short.icon)
         }
     }
 }

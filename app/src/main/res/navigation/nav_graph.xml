@@ -9,6 +9,19 @@
         android:id="@+id/homelikeFragment"
         android:name="com.example.weather20.presentation.HomelikeFragment"
         android:label="fragment_homelike"
-        tools:layout="@layout/fragment_homelike" />
+        tools:layout="@layout/fragment_homelike" >
+        <action
+            android:id="@+id/action_homelikeFragment_to_detailForecastInfoFragment"
+            app:destination="@id/detailForecastInfoFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/detailForecastInfoFragment"
+        android:name="com.example.weather20.presentation.detailinfofragment.DetailForecastInfoFragment"
+        android:label="fragment_detail_forecast_info"
+        tools:layout="@layout/fragment_detail_forecast_info" >
+        <action
+            android:id="@+id/action_detailForecastInfoFragment_to_homelikeFragment"
+            app:destination="@id/homelikeFragment" />
+    </fragment>
 
 </navigation>

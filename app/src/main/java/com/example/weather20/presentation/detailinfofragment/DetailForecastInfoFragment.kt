@@ -1,7 +1,6 @@
-package com.example.weather20.presentation
+package com.example.weather20.presentation.detailinfofragment
 
-import android.Manifest.permission.ACCESS_COARSE_LOCATION
-import android.Manifest.permission.ACCESS_FINE_LOCATION
+import android.Manifest
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -19,12 +18,11 @@ import androidx.core.app.ActivityCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.weather20.R
 import com.example.weather20.State
-import com.example.weather20.databinding.FragmentHomelikeBinding
-import com.example.weather20.presentation.adapters.ForecastListAdapter
+import com.example.weather20.databinding.FragmentDetailForecastInfoBinding
+import com.example.weather20.presentation.detailinfofragment.adapters.HoursListAdapter
 import com.example.weather20.presentation.extensions.isPermissionsGranted
 import com.example.weather20.presentation.managers.DialogManager
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -37,27 +35,36 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-@AndroidEntryPoint
-class HomelikeFragment @Inject constructor() : Fragment() {
+private const val ARG_PARAM1 = "position"
 
-    lateinit var fusedLocationClient: FusedLocationProviderClient
-    private var _binding: FragmentHomelikeBinding? = null
+@AndroidEntryPoint
+class DetailForecastInfoFragment @Inject constructor() : Fragment() {
+
+    private var _binding: FragmentDetailForecastInfoBinding? = null
     private val binding get() = _binding!!
+    lateinit var fusedLocationClient: FusedLocationProviderClient
     private lateinit var pLauncher: ActivityResultLauncher<String>
 
-    private var position: Int = 0
+    private val hoursListAdapter = HoursListAdapter()
 
     @Inject
-    lateinit var homelikeViewModelFactory: HomelikeViewModelFactory
-    private val viewModel: HomelikeViewModel by viewModels { homelikeViewModelFactory }
+    lateinit var detailForecastInfoViewModelFactory: DetailForecastInfoViewModelFactory
+    private val viewModel: DetailForecastInfoViewModel by viewModels { detailForecastInfoViewModelFactory }
 
-    private val forecastListAdapter = ForecastListAdapter{ onItemClick(it) }
+    private var param1: String? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        arguments?.let {
+            param1 = it.getInt(ARG_PARAM1).toString()
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentHomelikeBinding.inflate(inflater, container, false)
+        _binding = FragmentDetailForecastInfoBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -66,10 +73,8 @@ class HomelikeFragment @Inject constructor() : Fragment() {
         checkPermission()
         initial()
 
-        position = forecastListAdapter.position
-
         with(binding.lottieBackground) {
-            setAnimation(R.raw.background_day)
+            setAnimation(R.raw.detail_frag_background)
             playAnimation()
         }
 
@@ -83,13 +88,11 @@ class HomelikeFragment @Inject constructor() : Fragment() {
                         lottieLoading.playAnimation()
                         lottieBackground.isVisible = false
                         cardViewForecast.isVisible = false
-                        rcDaysFuture.isVisible = false
                     }
 
                     State.Success -> with(binding) {
                         lottieLoading.isVisible = false
                         lottieLoading.pauseAnimation()
-                        rcDaysFuture.isVisible = true
                         cardViewForecast.isVisible = true
                         lottieBackground.isVisible = true
                     }
@@ -97,20 +100,15 @@ class HomelikeFragment @Inject constructor() : Fragment() {
             }
         }
 
-        binding.rcDaysFuture.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
-
-        binding.rcDaysFuture.adapter = forecastListAdapter
+        binding.rcHoursFuture.layoutManager =
+            LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+        binding.rcHoursFuture.adapter = hoursListAdapter
 
         lifecycleScope.launch {
-            viewModel.forecasts.onEach {
-                forecastListAdapter.submitList(it.toList())
+            viewModel.hours.onEach {
+                hoursListAdapter.submitList(it.toList())
             }.launchIn(viewLifecycleOwner.lifecycleScope)
         }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
     private fun initial() {
@@ -120,7 +118,7 @@ class HomelikeFragment @Inject constructor() : Fragment() {
 
     private fun checkLocation() {
         if (isLocationEnabled()) {
-            getLocation()
+            getLocationToHoursFragment()
         } else {
             DialogManager.locationSettingsDialog(requireContext(), object : DialogManager.Listener {
                 override fun onClick(name: String?) {
@@ -137,14 +135,14 @@ class HomelikeFragment @Inject constructor() : Fragment() {
         return locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
     }
 
-    private fun getLocation() {
+    private fun getLocationToHoursFragment() {
         val ct = CancellationTokenSource()
         if (ActivityCompat.checkSelfPermission(
                 requireContext(),
-                ACCESS_FINE_LOCATION
+                Manifest.permission.ACCESS_FINE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
                 requireContext(),
-                ACCESS_COARSE_LOCATION
+                Manifest.permission.ACCESS_COARSE_LOCATION
             ) != PackageManager.PERMISSION_GRANTED
         ) {
             return
@@ -153,12 +151,12 @@ class HomelikeFragment @Inject constructor() : Fragment() {
             .getCurrentLocation(Priority.PRIORITY_HIGH_ACCURACY, ct.token)
             .addOnCompleteListener {
                 lifecycleScope.launch {
-                    viewModel.refreshForecast(
+                    viewModel.refreshForecastHours(
                         binding,
                         it.result.latitude,
                         it.result.longitude,
                         requireActivity(),
-                        viewModel.forecastInfo(it.result.latitude, it.result.longitude).fact
+                        param1!!.toInt()
                     )
                 }
             }
@@ -173,17 +171,24 @@ class HomelikeFragment @Inject constructor() : Fragment() {
     }
 
     private fun checkPermission() {
-        if (!isPermissionsGranted(ACCESS_FINE_LOCATION)) {
+        if (!isPermissionsGranted(Manifest.permission.ACCESS_FINE_LOCATION)) {
             permissionListener()
-            pLauncher.launch(ACCESS_FINE_LOCATION)
+            pLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
         }
     }
 
-    private fun onItemClick(position: Int) {
-        findNavController().navigate(
-            R.id.action_homelikeFragment_to_detailForecastInfoFragment,
-        Bundle().apply {
-            putInt( "position" , position)
-        })
+    override fun onDestroy() {
+        super.onDestroy()
+        _binding = null
+    }
+
+    companion object {
+        @JvmStatic
+        fun newInstance(param1: Int) =
+            DetailForecastInfoFragment().apply {
+                arguments = Bundle().apply {
+                    putInt(ARG_PARAM1, param1)
+                }
+            }
     }
 }

@@ -24,4 +24,7 @@
     <string name="feels_like">Feels like</string>
     <string name="min_temp">Min temp</string>
     <string name="max_temp">Max temp</string>
+    <string name="feels_like_future">Will be feels like</string>
+    <string name="sorry_no_forecast_hour">Sorry, the weather has not yet been forecast by the clock on this day</string>
+
 </resources>

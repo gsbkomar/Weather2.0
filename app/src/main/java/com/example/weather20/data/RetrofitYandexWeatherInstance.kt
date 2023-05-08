@@ -1,6 +1,7 @@
 package com.example.weather20.data
 
 import com.example.weather20.Key
+import com.example.weather20.data.dto.ResultsDto
 import com.example.weather20.entity.Results
 import retrofit2.Retrofit
 import retrofit2.converter.moshi.MoshiConverterFactory
@@ -35,7 +36,7 @@ class RetrofitYandexWeatherInstance @Inject constructor() {
             @Query("lon") lon: Double,
             @Query("limit") limit: Byte = 7,
             @Query("extra") extra: Boolean = true
-        ): Results
+        ): ResultsDto
     }
 }
 

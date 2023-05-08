@@ -25,5 +25,7 @@
     <string name="feels_like">Ощущается как</string>
     <string name="min_temp">Мин. температура</string>
     <string name="max_temp">Макс. температура</string>
+    <string name="feels_like_future">Будет ощущаться как</string>
+    <string name="sorry_no_forecast_hour">Извините, в этот день погода по часам еще не прогнозирована</string>
 
 </resources>
