@@ -46,7 +46,6 @@ class DetailForecastInfoViewModel @Inject constructor(private val getForecastUse
     ) {
 
         val forecast = forecastInfo(lat, lon, position).parts!!.day_short
-        val currentTemp = forecast.temp
 
         viewModelScope.launch {
             _state.value = State.Loading
@@ -56,8 +55,7 @@ class DetailForecastInfoViewModel @Inject constructor(private val getForecastUse
                     tvCondition.text =
                         Translations().translateCondition(forecast.condition, activity)
                     tvTime.text = forecastInfo(lat, lon, position).date
-                    tvCurrentTemp.text =
-                        if (currentTemp < 0) "-$currentTemp C°" else "$currentTemp C°"
+                    tvCurrentTemp.text = "${forecast.temp} C°"
                     binding.iconDashboardCurrentTemp.loadIcon(forecast.icon)
                     tvWindSpeed.text = "${forecast.wind_speed} м/с"
                     tvFeelsLike.text =

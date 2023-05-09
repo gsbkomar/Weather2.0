@@ -30,8 +30,8 @@ class HoursListAdapter @Inject constructor() : ListAdapter<HoursDto, HoursViewHo
         val current = item.temp
         with(holder.binding) {
             tvDate.text = Translations().timeInReadableForm(item)
-            tvMaxTemp.text = if (current < 0) "-" + item.temp.toString() + "C°" else item.temp.toString() + "C°"
-            tvMinTemp.text = if (current < 0) "-" + item.feels_like.toString() + "C°" else item.feels_like.toString() + "C°"
+            tvMaxTemp.text = "${item.temp} C°"
+            tvMinTemp.text = "${item.feels_like} C°"
             ivIcon.loadIcon(item.icon)
         }
     }

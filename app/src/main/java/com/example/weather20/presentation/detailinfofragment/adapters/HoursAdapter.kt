@@ -28,11 +28,10 @@ class HoursAdapter @Inject constructor() : RecyclerView.Adapter<HoursViewHolder>
 
     override fun onBindViewHolder(holder: HoursViewHolder, position: Int) {
         val forecasts = forecastsData.getOrNull(position)!!
-        val current = forecasts.temp
         with(holder.binding) {
             tvDate.text = Translations().timeInReadableForm(forecasts)
-            tvMaxTemp.text = if (current < 0) "-" + forecasts.temp.toString() + "C°" else forecasts.temp.toString() + "C°"
-            tvMinTemp.text = if (current < 0) "-" + forecasts.feels_like.toString() + "C°" else forecasts.feels_like.toString() + "C°"
+            tvMaxTemp.text = "${forecasts.temp.toString()} C°"
+            tvMinTemp.text = "${forecasts.feels_like.toString()} C°"
             ivIcon.loadIcon(forecasts.icon)
         }
     }

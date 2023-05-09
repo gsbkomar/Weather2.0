@@ -45,7 +45,7 @@ class HomelikeViewModel @Inject constructor(private var getForecastUseCase: GetF
         activity: Activity,
         fact: FactDto
     ) {
-        val currentTemp = forecastInfo(lat, lon).fact.temp
+        val forecast = forecastInfo(lat, lon).fact
 
         viewModelScope.launch {
             _state.value = State.Loading
@@ -54,8 +54,7 @@ class HomelikeViewModel @Inject constructor(private var getForecastUseCase: GetF
                     _state.value = State.Loading
                     tvCondition.text = Translations().translateCondition(fact.condition, activity)
                     tvTime.text = forecastInfo(lat, lon).forecasts.first().date
-                    tvCurrentTemp.text =
-                        if (currentTemp < 0) "-$currentTemp C°" else "$currentTemp C°"
+                    tvCurrentTemp.text = "${forecast.temp} C°"
                     binding.iconDashboardCurrentTemp.loadIcon(forecastInfo(lat, lon).fact.icon)
                     tvWindSpeed.text = "${forecastInfo(lat, lon).fact.wind_speed} м/с"
                     tvFeelsLike.text =

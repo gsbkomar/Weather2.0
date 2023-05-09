@@ -11,9 +11,6 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.app.ActivityCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
@@ -23,7 +20,6 @@ import com.example.weather20.R
 import com.example.weather20.State
 import com.example.weather20.databinding.FragmentDetailForecastInfoBinding
 import com.example.weather20.presentation.detailinfofragment.adapters.HoursListAdapter
-import com.example.weather20.presentation.extensions.isPermissionsGranted
 import com.example.weather20.presentation.managers.DialogManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -43,7 +39,6 @@ class DetailForecastInfoFragment @Inject constructor() : Fragment() {
     private var _binding: FragmentDetailForecastInfoBinding? = null
     private val binding get() = _binding!!
     lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var pLauncher: ActivityResultLauncher<String>
 
     private val hoursListAdapter = HoursListAdapter()
 
@@ -70,7 +65,6 @@ class DetailForecastInfoFragment @Inject constructor() : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        checkPermission()
         initial()
 
         with(binding.lottieBackground) {
@@ -160,21 +154,6 @@ class DetailForecastInfoFragment @Inject constructor() : Fragment() {
                     )
                 }
             }
-    }
-
-    private fun permissionListener() {
-        pLauncher = registerForActivityResult(
-            ActivityResultContracts.RequestPermission()
-        ) {
-            Toast.makeText(activity, "Permission is $it", Toast.LENGTH_LONG).show()
-        }
-    }
-
-    private fun checkPermission() {
-        if (!isPermissionsGranted(Manifest.permission.ACCESS_FINE_LOCATION)) {
-            permissionListener()
-            pLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
-        }
     }
 
     override fun onDestroy() {

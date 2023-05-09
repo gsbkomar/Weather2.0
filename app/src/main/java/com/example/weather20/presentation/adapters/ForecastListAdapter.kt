@@ -26,12 +26,11 @@ class ForecastListAdapter @Inject constructor(
     override fun onBindViewHolder(holder: ForecastViewHolder, position: Int) {
         val item = getItem(position)
         this.position = position
-        val current = item.parts!!.day_short.temp
 
         with(holder.binding) {
             tvDate.text = item.date
-            tvMaxTemp.text = if (current < 0) "-" + item.parts!!.day_short.temp.toString() + "C°" else item.parts!!.day_short.temp.toString() + "C°"
-            tvMinTemp.text = if (current < 0) "-" + item.parts!!.day_short.temp_min.toString() + "C°" else item.parts!!.day_short.temp_min.toString() + "C°"
+            tvMaxTemp.text = "${item.parts!!.day_short.temp.toString()} C°"
+            tvMinTemp.text = "${item.parts!!.day_short.temp_min.toString()} C°"
             ivIcon.loadIcon(item.parts.day_short.icon.toString())
         }
 
