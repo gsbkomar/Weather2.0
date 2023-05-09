@@ -8,9 +8,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.weather20.R
 import com.example.weather20.State
 import com.example.weather20.data.dto.forecastdto.HoursDto
-import com.example.weather20.data.dto.resultsdto.ForecastsDto
 import com.example.weather20.databinding.FragmentDetailForecastInfoBinding
-import com.example.weather20.domain.GetForecastUseCase
+import com.example.weather20.domain.usecases.GetForecastsUseCase
 import com.example.weather20.presentation.extensions.loadIcon
 import com.example.weather20.presentation.translations.Translations
 import kotlinx.coroutines.Dispatchers
@@ -21,8 +20,9 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class DetailForecastInfoViewModel @Inject constructor(private val getForecastUseCase: GetForecastUseCase) :
-    ViewModel() {
+class DetailForecastInfoViewModel @Inject constructor(
+    private val getForecastsUseCase: GetForecastsUseCase
+) : ViewModel() {
 
     private var _state = MutableStateFlow<State>(State.Loading)
     var state = _state.asStateFlow()
@@ -33,9 +33,6 @@ class DetailForecastInfoViewModel @Inject constructor(private val getForecastUse
     private var _hours = MutableStateFlow<List<HoursDto>>(emptyList())
     val hours = _hours.asStateFlow()
 
-    suspend fun forecastInfo(lat: Double, lon: Double, position: Int): ForecastsDto =
-        getForecastUseCase.getForecastInfo(lat, lon).forecasts[position]
-
     @SuppressLint("SetTextI18n")
     suspend fun refreshForecastHours(
         binding: FragmentDetailForecastInfoBinding,
@@ -45,7 +42,7 @@ class DetailForecastInfoViewModel @Inject constructor(private val getForecastUse
         position: Int
     ) {
 
-        val forecast = forecastInfo(lat, lon, position).parts!!.day_short
+        val forecast = getForecastsUseCase.execute(lat, lon)[position].parts!!.day_short
 
         viewModelScope.launch {
             _state.value = State.Loading
@@ -54,7 +51,7 @@ class DetailForecastInfoViewModel @Inject constructor(private val getForecastUse
                     _state.value = State.Loading
                     tvCondition.text =
                         Translations().translateCondition(forecast.condition, activity)
-                    tvTime.text = forecastInfo(lat, lon, position).date
+                    tvTime.text = getForecastsUseCase.execute(lat, lon)[position].date
                     tvCurrentTemp.text = "${forecast.temp} C°"
                     binding.iconDashboardCurrentTemp.loadIcon(forecast.icon)
                     tvWindSpeed.text = "${forecast.wind_speed} м/с"
@@ -70,7 +67,6 @@ class DetailForecastInfoViewModel @Inject constructor(private val getForecastUse
                 }
             } catch (e: Exception) {
                 _state.value = State.Error("No internet connection or location enabled")
-                Log.d("DetailForecastInfoViewModel", e.message.toString())
             }
         }
     }
@@ -78,7 +74,7 @@ class DetailForecastInfoViewModel @Inject constructor(private val getForecastUse
     private fun forecastsLoader(lat: Double, lon: Double, position: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             kotlin.runCatching {
-                getForecastUseCase.getForecastInfo(lat, lon).forecasts[position].hours
+                getForecastsUseCase.execute(lat, lon)[position].hours
             }.fold(
                 onSuccess = {
                     _hours.value = it

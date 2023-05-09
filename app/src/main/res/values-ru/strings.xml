@@ -27,5 +27,7 @@
     <string name="max_temp">Макс. температура</string>
     <string name="feels_like_future">Будет ощущаться как</string>
     <string name="sorry_no_forecast_hour">Извините, в этот день погода по часам еще не прогнозирована</string>
+    <string name="enable_location">Включить определение местоположения?</string>
+    <string name="location_disabled">Местоположение отключено, вы хотите включить местоположение?</string>
 
 </resources>

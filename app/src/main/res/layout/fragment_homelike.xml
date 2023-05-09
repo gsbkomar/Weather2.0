@@ -22,6 +22,14 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
+    <LinearLayout
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
     <androidx.cardview.widget.CardView
         android:visibility="gone"
         tools:visibility="visible"
@@ -51,6 +59,7 @@
                 android:id="@+id/tv_min_max"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:textSize="13sp"
                 android:layout_marginTop="5dp"
                 android:fontFamily="@font/abeezee"
                 android:textColor="@color/gray_from_text"
@@ -155,6 +164,7 @@
         app:layout_constraintTop_toBottomOf="@id/card_view_forecast"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"/>
+    </LinearLayout>
 
     <com.airbnb.lottie.LottieAnimationView
         android:visibility="visible"

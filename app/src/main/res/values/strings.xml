@@ -26,5 +26,7 @@
     <string name="max_temp">Max temp</string>
     <string name="feels_like_future">Will be feels like</string>
     <string name="sorry_no_forecast_hour">Sorry, the weather has not yet been forecast by the clock on this day</string>
+    <string name="enable_location">Enable location?</string>
+    <string name="location_disabled">Location disabled, do you want enable location?</string>
 
 </resources>

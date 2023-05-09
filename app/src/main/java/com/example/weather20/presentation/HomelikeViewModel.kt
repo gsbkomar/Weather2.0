@@ -11,7 +11,7 @@ import com.example.weather20.data.dto.ResultsDto
 import com.example.weather20.data.dto.resultsdto.FactDto
 import com.example.weather20.data.dto.resultsdto.ForecastsDto
 import com.example.weather20.databinding.FragmentHomelikeBinding
-import com.example.weather20.domain.GetForecastUseCase
+import com.example.weather20.domain.GetResultsForecastUseCase
 import com.example.weather20.presentation.extensions.loadIcon
 import com.example.weather20.presentation.translations.Translations
 import kotlinx.coroutines.Dispatchers
@@ -22,7 +22,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class HomelikeViewModel @Inject constructor(private var getForecastUseCase: GetForecastUseCase) :
+class HomelikeViewModel @Inject constructor(private var getResultsForecastUseCase: GetResultsForecastUseCase) :
     ViewModel() {
 
     private var _state = MutableStateFlow<State>(State.Loading)
@@ -34,9 +34,6 @@ class HomelikeViewModel @Inject constructor(private var getForecastUseCase: GetF
     private var _forecasts = MutableStateFlow<List<ForecastsDto>>(emptyList())
     val forecasts = _forecasts.asStateFlow()
 
-    suspend fun forecastInfo(lat: Double, lon: Double): ResultsDto =
-        getForecastUseCase.getForecastInfo(lat, lon)
-
     @SuppressLint("SetTextI18n")
     suspend fun refreshForecast(
         binding: FragmentHomelikeBinding,
@@ -45,7 +42,7 @@ class HomelikeViewModel @Inject constructor(private var getForecastUseCase: GetF
         activity: Activity,
         fact: FactDto
     ) {
-        val forecast = forecastInfo(lat, lon).fact
+        val forecast = getResultsForecastUseCase.execute(lat, lon).fact
 
         viewModelScope.launch {
             _state.value = State.Loading
@@ -53,24 +50,15 @@ class HomelikeViewModel @Inject constructor(private var getForecastUseCase: GetF
                 with(binding) {
                     _state.value = State.Loading
                     tvCondition.text = Translations().translateCondition(fact.condition, activity)
-                    tvTime.text = forecastInfo(lat, lon).forecasts.first().date
+                    tvTime.text = getResultsForecastUseCase.execute(lat, lon).forecasts.first().date
                     tvCurrentTemp.text = "${forecast.temp} C°"
-                    binding.iconDashboardCurrentTemp.loadIcon(forecastInfo(lat, lon).fact.icon)
-                    tvWindSpeed.text = "${forecastInfo(lat, lon).fact.wind_speed} м/с"
+                    binding.iconDashboardCurrentTemp.loadIcon(getResultsForecastUseCase.execute(lat, lon).fact.icon)
+                    tvWindSpeed.text = "${getResultsForecastUseCase.execute(lat, lon).fact.wind_speed} м/с"
                     tvFeelsLike.text =
-                        activity.getString(R.string.feels_like) + ": " + forecastInfo(
-                            lat,
-                            lon
-                        ).fact.feels_like.toString() + " C°"
-                    tvHumidity.text = "${forecastInfo(lat, lon).fact.humidity} %"
-                    tvMinMax.text = activity.getString(R.string.min_temp) + ": " + forecastInfo(
-                        lat,
-                        lon
-                    ).forecasts.first().parts!!.day_short
-                        .temp_min.toString() + " C°," + activity.getString(R.string.max_temp) + ": " + forecastInfo(
-                        lat,
-                        lon
-                    )
+                        activity.getString(R.string.feels_like) + ": " + forecast.feels_like.toString() + " C°"
+                    tvHumidity.text = "${forecast.humidity} %"
+                    tvMinMax.text = activity.getString(R.string.min_temp) + ": " + getResultsForecastUseCase.execute(lat, lon).forecasts.first().parts!!.day_short
+                        .temp_min.toString() + " C°," + activity.getString(R.string.max_temp) + ": " + getResultsForecastUseCase.execute(lat, lon)
                         .forecasts.first().parts!!.day_short.temp.toString() + " C°"
                     forecastsLoader(lat, lon)
                     _state.value = State.Success
@@ -85,7 +73,7 @@ class HomelikeViewModel @Inject constructor(private var getForecastUseCase: GetF
     private fun forecastsLoader(lat: Double, lon: Double) {
         viewModelScope.launch(Dispatchers.IO) {
             kotlin.runCatching {
-                getForecastUseCase.getForecastInfo(lat, lon).forecasts
+                getResultsForecastUseCase.execute(lat, lon).forecasts
             }.fold(
                 onSuccess = {
                     _forecasts.value = it

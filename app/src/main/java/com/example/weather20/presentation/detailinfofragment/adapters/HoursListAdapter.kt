@@ -5,9 +5,7 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import com.example.weather20.data.dto.forecastdto.HoursDto
-import com.example.weather20.data.dto.resultsdto.ForecastsDto
 import com.example.weather20.databinding.ForecastDayItemBinding
-import com.example.weather20.presentation.adapters.ForecastViewHolder
 import com.example.weather20.presentation.extensions.loadIcon
 import com.example.weather20.presentation.translations.Translations
 import javax.inject.Inject
@@ -27,7 +25,6 @@ class HoursListAdapter @Inject constructor() : ListAdapter<HoursDto, HoursViewHo
     override fun onBindViewHolder(holder: HoursViewHolder, position: Int) {
         val item = getItem(position)
         this.position = position
-        val current = item.temp
         with(holder.binding) {
             tvDate.text = Translations().timeInReadableForm(item)
             tvMaxTemp.text = "${item.temp} C°"

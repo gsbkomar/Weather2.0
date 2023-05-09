@@ -30,8 +30,8 @@ class HoursAdapter @Inject constructor() : RecyclerView.Adapter<HoursViewHolder>
         val forecasts = forecastsData.getOrNull(position)!!
         with(holder.binding) {
             tvDate.text = Translations().timeInReadableForm(forecasts)
-            tvMaxTemp.text = "${forecasts.temp.toString()} C°"
-            tvMinTemp.text = "${forecasts.feels_like.toString()} C°"
+            tvMaxTemp.text = "${forecasts.temp} C°"
+            tvMinTemp.text = "${forecasts.feels_like} C°"
             ivIcon.loadIcon(forecasts.icon)
         }
     }

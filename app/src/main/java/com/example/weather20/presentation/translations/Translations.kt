@@ -34,7 +34,7 @@ class Translations {
         return when {
             (hours < 9) -> "0${hours.plus(1)}:00"
             (hours < 20) -> "${hours.plus(1)}:00"
-            (hours < 24) -> "${hours.plus(1)}:00"
+            (hours < 23) -> "${hours.plus(1)}:00"
             else -> {"00:00"}
         }
     }
