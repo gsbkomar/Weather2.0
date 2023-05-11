@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weather20.R
 import com.example.weather20.State
+import com.example.weather20.data.ForecastRepositoryImpl
 import com.example.weather20.data.dto.forecastdto.HoursDto
 import com.example.weather20.databinding.FragmentDetailForecastInfoBinding
 import com.example.weather20.domain.usecases.GetForecastsUseCase
@@ -20,9 +21,10 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class DetailForecastInfoViewModel @Inject constructor(
-    private val getForecastsUseCase: GetForecastsUseCase
+class DetailForecastInfoViewModel @Inject constructor(repository: ForecastRepositoryImpl
 ) : ViewModel() {
+
+    private val getForecastsUseCase = GetForecastsUseCase(repository)
 
     private var _state = MutableStateFlow<State>(State.Loading)
     var state = _state.asStateFlow()

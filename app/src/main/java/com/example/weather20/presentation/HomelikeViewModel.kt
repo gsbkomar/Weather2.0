@@ -7,11 +7,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.weather20.R
 import com.example.weather20.State
-import com.example.weather20.data.dto.ResultsDto
+import com.example.weather20.data.ForecastRepositoryImpl
 import com.example.weather20.data.dto.resultsdto.FactDto
 import com.example.weather20.data.dto.resultsdto.ForecastsDto
 import com.example.weather20.databinding.FragmentHomelikeBinding
-import com.example.weather20.domain.GetResultsForecastUseCase
+import com.example.weather20.domain.repository.ForecastRepository
+import com.example.weather20.domain.usecases.GetResultsForecastUseCase
 import com.example.weather20.presentation.extensions.loadIcon
 import com.example.weather20.presentation.translations.Translations
 import kotlinx.coroutines.Dispatchers
@@ -22,9 +23,10 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-class HomelikeViewModel @Inject constructor(private var getResultsForecastUseCase: GetResultsForecastUseCase) :
+class HomelikeViewModel @Inject constructor(forecastRepository: ForecastRepositoryImpl) :
     ViewModel() {
 
+    var getResultsForecastUseCase = GetResultsForecastUseCase(forecastRepository)
     private var _state = MutableStateFlow<State>(State.Loading)
     var state = _state.asStateFlow()
 

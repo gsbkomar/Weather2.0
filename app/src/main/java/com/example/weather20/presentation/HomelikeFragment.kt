@@ -158,7 +158,7 @@ class HomelikeFragment @Inject constructor() : Fragment() {
                         it.result.latitude,
                         it.result.longitude,
                         requireActivity(),
-                        viewModel.forecastInfo(it.result.latitude, it.result.longitude).fact
+                        viewModel.getResultsForecastUseCase.execute(it.result.latitude, it.result.longitude).fact
                     )
                 }
             }
