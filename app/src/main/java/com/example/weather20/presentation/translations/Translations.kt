@@ -1,8 +1,8 @@
 package com.example.weather20.presentation.translations
 
 import android.app.Activity
+import com.example.data.dto.forecastdto.HoursDto
 import com.example.weather20.R
-import com.example.weather20.data.dto.forecastdto.HoursDto
 
 class Translations {
     fun translateCondition(fact: String?, activity: Activity) = when (fact) {

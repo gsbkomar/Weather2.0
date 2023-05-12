@@ -5,12 +5,11 @@ import android.app.Activity
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.data.dto.forecastdto.HoursDto
+import com.example.data.repository.ForecastRepositoryImpl
 import com.example.weather20.R
 import com.example.weather20.State
-import com.example.weather20.data.ForecastRepositoryImpl
-import com.example.weather20.data.dto.forecastdto.HoursDto
 import com.example.weather20.databinding.FragmentDetailForecastInfoBinding
-import com.example.weather20.domain.usecases.GetForecastsUseCase
 import com.example.weather20.presentation.extensions.loadIcon
 import com.example.weather20.presentation.translations.Translations
 import kotlinx.coroutines.Dispatchers
@@ -24,7 +23,8 @@ import javax.inject.Inject
 class DetailForecastInfoViewModel @Inject constructor(repository: ForecastRepositoryImpl
 ) : ViewModel() {
 
-    private val getForecastsUseCase = GetForecastsUseCase(repository)
+    private val getForecastsUseCase =
+        com.example.domain.domain.usecases.GetForecastsUseCase(repository)
 
     private var _state = MutableStateFlow<State>(State.Loading)
     var state = _state.asStateFlow()
@@ -79,7 +79,7 @@ class DetailForecastInfoViewModel @Inject constructor(repository: ForecastReposi
                 getForecastsUseCase.execute(lat, lon)[position].hours
             }.fold(
                 onSuccess = {
-                    _hours.value = it
+                    _hours.value = it as List<HoursDto>
                 },
                 onFailure = {
                     Log.d("DetailForecastInfoViewModel", "forecast: ${it.message ?: ""}")

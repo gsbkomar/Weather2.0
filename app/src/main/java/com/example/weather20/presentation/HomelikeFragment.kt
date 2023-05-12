@@ -26,6 +26,7 @@ import com.example.weather20.State
 import com.example.weather20.databinding.FragmentHomelikeBinding
 import com.example.weather20.presentation.adapters.ForecastListAdapter
 import com.example.weather20.presentation.extensions.isPermissionsGranted
+import com.example.weather20.presentation.factory.HomelikeViewModelFactory
 import com.example.weather20.presentation.managers.DialogManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices

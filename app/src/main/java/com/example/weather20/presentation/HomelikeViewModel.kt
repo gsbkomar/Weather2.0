@@ -5,14 +5,12 @@ import android.app.Activity
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.data.repository.ForecastRepositoryImpl
+import com.example.domain.domain.entity.resultobjects.Fact
 import com.example.weather20.R
 import com.example.weather20.State
-import com.example.weather20.data.ForecastRepositoryImpl
-import com.example.weather20.data.dto.resultsdto.FactDto
 import com.example.weather20.data.dto.resultsdto.ForecastsDto
 import com.example.weather20.databinding.FragmentHomelikeBinding
-import com.example.weather20.domain.repository.ForecastRepository
-import com.example.weather20.domain.usecases.GetResultsForecastUseCase
 import com.example.weather20.presentation.extensions.loadIcon
 import com.example.weather20.presentation.translations.Translations
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +24,7 @@ import javax.inject.Inject
 class HomelikeViewModel @Inject constructor(forecastRepository: ForecastRepositoryImpl) :
     ViewModel() {
 
-    var getResultsForecastUseCase = GetResultsForecastUseCase(forecastRepository)
+    var getResultsForecastUseCase = com.example.domain.domain.usecases.GetResultsForecastUseCase(forecastRepository)
     private var _state = MutableStateFlow<State>(State.Loading)
     var state = _state.asStateFlow()
 
@@ -42,7 +40,7 @@ class HomelikeViewModel @Inject constructor(forecastRepository: ForecastReposito
         lat: Double,
         lon: Double,
         activity: Activity,
-        fact: FactDto
+        fact: Fact
     ) {
         val forecast = getResultsForecastUseCase.execute(lat, lon).fact
 
@@ -78,7 +76,7 @@ class HomelikeViewModel @Inject constructor(forecastRepository: ForecastReposito
                 getResultsForecastUseCase.execute(lat, lon).forecasts
             }.fold(
                 onSuccess = {
-                    _forecasts.value = it
+                    _forecasts.value = it as List<ForecastsDto>
                 },
                 onFailure = {
                     Log.d("HomelikeViewModel", "forecast: ${it.message ?: ""}")

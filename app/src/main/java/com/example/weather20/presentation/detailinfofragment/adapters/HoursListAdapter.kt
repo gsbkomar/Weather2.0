@@ -4,7 +4,7 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
-import com.example.weather20.data.dto.forecastdto.HoursDto
+import com.example.data.dto.forecastdto.HoursDto
 import com.example.weather20.databinding.ForecastDayItemBinding
 import com.example.weather20.presentation.extensions.loadIcon
 import com.example.weather20.presentation.translations.Translations

@@ -2,7 +2,6 @@ package com.example.weather20.presentation.managers
 
 import android.app.AlertDialog
 import android.content.Context
-import android.widget.EditText
 import com.example.weather20.R
 
 object DialogManager {

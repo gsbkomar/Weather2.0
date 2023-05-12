@@ -1,11 +1,9 @@
 package com.example.weather20.presentation.detailinfofragment.adapters
 
-import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
-import com.example.weather20.data.dto.forecastdto.HoursDto
-import com.example.weather20.data.dto.resultsdto.ForecastsDto
+import com.example.data.dto.forecastdto.HoursDto
 import com.example.weather20.databinding.ForecastDayItemBinding
 import com.example.weather20.presentation.extensions.loadIcon
 import com.example.weather20.presentation.translations.Translations

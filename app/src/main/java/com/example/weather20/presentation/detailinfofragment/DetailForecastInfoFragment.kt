@@ -20,6 +20,7 @@ import com.example.weather20.R
 import com.example.weather20.State
 import com.example.weather20.databinding.FragmentDetailForecastInfoBinding
 import com.example.weather20.presentation.detailinfofragment.adapters.HoursListAdapter
+import com.example.weather20.presentation.factory.DetailForecastInfoViewModelFactory
 import com.example.weather20.presentation.managers.DialogManager
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices

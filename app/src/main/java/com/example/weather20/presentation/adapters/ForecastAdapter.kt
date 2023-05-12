@@ -36,8 +36,8 @@ class ForecastAdapter @Inject constructor() : Adapter<ForecastViewHolder>() {
         with(holder.binding) {
             tvDate.text = forecasts.date
             tvMaxTemp.text = forecasts.parts!!.day_short.temp.toString()
-            tvMinTemp.text = forecasts.parts.day_short.temp_min.toString()
-            ivIcon.loadIcon(forecasts.parts.day_short.icon)
+            tvMinTemp.text = forecasts.parts!!.day_short.temp_min.toString()
+            ivIcon.loadIcon(forecasts.parts!!.day_short.icon)
         }
     }
 }

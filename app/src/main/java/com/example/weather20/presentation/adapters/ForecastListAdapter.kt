@@ -29,9 +29,9 @@ class ForecastListAdapter @Inject constructor(
 
         with(holder.binding) {
             tvDate.text = item.date
-            tvMaxTemp.text = "${item.parts!!.day_short.temp.toString()} C°"
-            tvMinTemp.text = "${item.parts!!.day_short.temp_min.toString()} C°"
-            ivIcon.loadIcon(item.parts.day_short.icon.toString())
+            tvMaxTemp.text = "${item.parts!!.day_short.temp} C°"
+            tvMinTemp.text = "${item.parts!!.day_short.temp_min} C°"
+            ivIcon.loadIcon(item.parts!!.day_short.icon.toString())
         }
 
         holder.binding.root.setOnClickListener { onClick(position) }
