@@ -74,6 +74,24 @@ class HomelikeFragment @Inject constructor() : Fragment() {
             playAnimation()
         }
 
+        checkStateInfo()
+
+        binding.rcDaysFuture.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
+        binding.rcDaysFuture.adapter = forecastListAdapter
+
+        lifecycleScope.launch {
+            viewModel.forecasts.onEach {
+                forecastListAdapter.submitList(it.toList())
+            }.launchIn(viewLifecycleOwner.lifecycleScope)
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
+
+    private fun checkStateInfo() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.state.collect { state ->
                 when (state) {
@@ -97,21 +115,6 @@ class HomelikeFragment @Inject constructor() : Fragment() {
                 }
             }
         }
-
-        binding.rcDaysFuture.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
-
-        binding.rcDaysFuture.adapter = forecastListAdapter
-
-        lifecycleScope.launch {
-            viewModel.forecasts.onEach {
-                forecastListAdapter.submitList(it.toList())
-            }.launchIn(viewLifecycleOwner.lifecycleScope)
-        }
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
     }
 
     private fun initial() {
@@ -126,8 +129,8 @@ class HomelikeFragment @Inject constructor() : Fragment() {
             DialogManager.locationSettingsDialog(requireContext(), object : DialogManager.Listener {
                 override fun onClick(name: String?) {
                     startActivity(Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS))
+                    getLocation()
                 }
-
             })
         }
     }
