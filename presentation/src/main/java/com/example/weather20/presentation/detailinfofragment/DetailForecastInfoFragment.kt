@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
@@ -19,6 +20,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.weather20.R
 import com.example.weather20.State
 import com.example.weather20.databinding.FragmentDetailForecastInfoBinding
+import com.example.weather20.presentation.Keys.KEY_POSITION
 import com.example.weather20.presentation.detailinfofragment.adapters.HoursListAdapter
 import com.example.weather20.presentation.factory.DetailForecastInfoViewModelFactory
 import com.example.weather20.presentation.managers.DialogManager
@@ -27,19 +29,18 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-private const val ARG_PARAM1 = "position"
 
 @AndroidEntryPoint
 class DetailForecastInfoFragment @Inject constructor() : Fragment() {
 
     private var _binding: FragmentDetailForecastInfoBinding? = null
     private val binding get() = _binding!!
-    lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
 
     private val hoursListAdapter = HoursListAdapter()
 
@@ -52,7 +53,7 @@ class DetailForecastInfoFragment @Inject constructor() : Fragment() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         arguments?.let {
-            param1 = it.getInt(ARG_PARAM1).toString()
+            param1 = it.getInt(KEY_POSITION).toString()
         }
     }
 
@@ -76,21 +77,13 @@ class DetailForecastInfoFragment @Inject constructor() : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.state.collect { state ->
                 when (state) {
-                    is State.Error -> TODO()
-                    State.Loading -> with(binding) {
-                        lottieLoading.setAnimation(R.raw.loading)
-                        lottieLoading.isVisible = true
-                        lottieLoading.playAnimation()
-                        lottieBackground.isVisible = false
-                        cardViewForecast.isVisible = false
+                    is State.Error -> {
+                        viewModel.error.collectLatest { message ->
+                            Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+                        }
                     }
-
-                    State.Success -> with(binding) {
-                        lottieLoading.isVisible = false
-                        lottieLoading.pauseAnimation()
-                        cardViewForecast.isVisible = true
-                        lottieBackground.isVisible = true
-                    }
+                    State.Loading -> setVisibility(false)
+                    State.Success -> setVisibility(true)
                 }
             }
         }
@@ -104,6 +97,14 @@ class DetailForecastInfoFragment @Inject constructor() : Fragment() {
                 hoursListAdapter.submitList(it.toList())
             }.launchIn(viewLifecycleOwner.lifecycleScope)
         }
+    }
+
+    private fun setVisibility(isVisible: Boolean) = with(binding) {
+        lottieLoading.setAnimation(R.raw.loading)
+        lottieLoading.isVisible = !isVisible
+        if (!isVisible) lottieLoading.playAnimation() else lottieLoading.pauseAnimation()
+        lottieBackground.isVisible = isVisible
+        cardViewForecast.isVisible = isVisible
     }
 
     private fun initial() {
@@ -160,15 +161,5 @@ class DetailForecastInfoFragment @Inject constructor() : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         _binding = null
-    }
-
-    companion object {
-        @JvmStatic
-        fun newInstance(param1: Int) =
-            DetailForecastInfoFragment().apply {
-                arguments = Bundle().apply {
-                    putInt(ARG_PARAM1, param1)
-                }
-            }
     }
 }

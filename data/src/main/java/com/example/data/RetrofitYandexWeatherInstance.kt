@@ -32,7 +32,7 @@ class RetrofitYandexWeatherInstance @Inject constructor() {
         suspend fun getForecastProvider(
             @Query("lat") lat: Double,
             @Query("lon") lon: Double,
-            @Query("limit") limit: Byte = 4,
+            //@Query("limit") limit: Byte = 4,
             @Query("extra") extra: Boolean = true
         ): ResultsDto
     }

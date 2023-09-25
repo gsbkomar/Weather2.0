@@ -8,6 +8,7 @@ import android.content.pm.PackageManager
 import android.location.LocationManager
 import android.os.Bundle
 import android.provider.Settings
+import android.util.Log
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -24,6 +25,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.weather20.R
 import com.example.weather20.State
 import com.example.weather20.databinding.FragmentHomelikeBinding
+import com.example.weather20.presentation.Keys.KEY_POSITION
 import com.example.weather20.presentation.adapters.ForecastListAdapter
 import com.example.weather20.presentation.extensions.isPermissionsGranted
 import com.example.weather20.presentation.factory.HomelikeViewModelFactory
@@ -33,6 +35,7 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
@@ -41,7 +44,7 @@ import javax.inject.Inject
 @AndroidEntryPoint
 class HomelikeFragment @Inject constructor() : Fragment() {
 
-    lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
     private var _binding: FragmentHomelikeBinding? = null
     private val binding get() = _binding!!
     private lateinit var pLauncher: ActivityResultLauncher<String>
@@ -64,8 +67,10 @@ class HomelikeFragment @Inject constructor() : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        checkStateInfo()
         checkPermission()
-        initial()
+        initialLocationClient()
 
         position = forecastListAdapter.position
 
@@ -73,8 +78,6 @@ class HomelikeFragment @Inject constructor() : Fragment() {
             setAnimation(R.raw.background_day)
             playAnimation()
         }
-
-        checkStateInfo()
 
         binding.rcDaysFuture.layoutManager = LinearLayoutManager(requireContext(), LinearLayoutManager.VERTICAL, false)
         binding.rcDaysFuture.adapter = forecastListAdapter
@@ -95,29 +98,30 @@ class HomelikeFragment @Inject constructor() : Fragment() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.state.collect { state ->
                 when (state) {
-                    is State.Error -> TODO()
-                    State.Loading -> with(binding) {
-                        lottieLoading.setAnimation(R.raw.loading)
-                        lottieLoading.isVisible = true
-                        lottieLoading.playAnimation()
-                        lottieBackground.isVisible = false
-                        cardViewForecast.isVisible = false
-                        rcDaysFuture.isVisible = false
+                    is State.Error -> {
+                        viewModel.error.collectLatest { message ->
+                            Toast.makeText(requireContext(), message , Toast.LENGTH_SHORT).show()
+                        }
                     }
+                    State.Loading -> setVisibility(false)
 
-                    State.Success -> with(binding) {
-                        lottieLoading.isVisible = false
-                        lottieLoading.pauseAnimation()
-                        rcDaysFuture.isVisible = true
-                        cardViewForecast.isVisible = true
-                        lottieBackground.isVisible = true
-                    }
+
+                    State.Success -> setVisibility(true)
                 }
             }
         }
     }
 
-    private fun initial() {
+    private fun setVisibility(isVisible: Boolean) = with(binding) {
+        lottieLoading.setAnimation(R.raw.loading)
+        lottieLoading.isVisible = !isVisible
+        if (!isVisible) lottieLoading.playAnimation() else lottieLoading.pauseAnimation()
+        lottieBackground.isVisible = isVisible
+        cardViewForecast.isVisible = isVisible
+        rcDaysFuture.isVisible = isVisible
+    }
+
+    private fun initialLocationClient() {
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(requireContext())
         checkLocation()
     }
@@ -172,7 +176,7 @@ class HomelikeFragment @Inject constructor() : Fragment() {
         pLauncher = registerForActivityResult(
             ActivityResultContracts.RequestPermission()
         ) {
-            Toast.makeText(activity, "Permission is $it", Toast.LENGTH_LONG).show()
+            checkLocation()
         }
     }
 
@@ -187,7 +191,7 @@ class HomelikeFragment @Inject constructor() : Fragment() {
         findNavController().navigate(
             R.id.action_homelikeFragment_to_detailForecastInfoFragment,
         Bundle().apply {
-            putInt( "position" , position)
+            putInt( KEY_POSITION , position)
         })
     }
 }

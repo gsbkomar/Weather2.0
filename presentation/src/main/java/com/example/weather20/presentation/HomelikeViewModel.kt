@@ -65,7 +65,6 @@ class HomelikeViewModel @Inject constructor(forecastRepository: ForecastReposito
                 }
             } catch (e: Exception) {
                 _state.value = State.Error("No internet connection or location enabled")
-                Log.d("HomelikeViewModel", e.message.toString())
             }
         }
     }
